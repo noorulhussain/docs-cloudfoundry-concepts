@@ -24,12 +24,12 @@ This table describes the major areas in the image above:
   <td>Blue</td>
   <td>Running and monitoring Tasks and Long Running Processes (LRPs)</td>
   <td><a href="https://github.com/cloudfoundry-incubator/diego-release">Diego Release</a></td>
-  <td>Diego Core components</td>
+  <td><a href="#core">Diego Core components</a></td>
 </tr>
 <tr>
   <td>Red</td>
-  <td>Translating app-specific messages from the Cloud Controller to the Receptor</td>
-  <td><a href="https://github.com/cloudfoundry-incubator/diego-design-notes#cc-bridge-components">Diego CC-Bridge Components</a></td>
+  <td>Translating app-specific messages from the Cloud Controller to the <a href="#receptor">Receptor</a></td>
+  <td><a href="https://github.com/cloudfoundry-incubator/diego-design-notes#cc-bridge-components"><a href="#bridge-components">Diego CC-Bridge Components</a></td>
   <td></td>
 </tr>
 <tr>
@@ -43,11 +43,11 @@ This table describes the major areas in the image above:
 
 ##<a id='core'></a>Diego Core Components##
 
-Components in the Diego core run and monitor Tasks and Long Running Processes (LRPs). The core consists of three major areas: the Brain, the Bulletin Board System (BBS), and the Cells.
+Components in the Diego core run and monitor Tasks and Long Running Processes (LRPs). The core consists of three major areas: the [Brain](#brain-components), the [Bulletin Board System](#bbs) (BBS), and the [Cells](#cell-components).
 
 ###<a id='brain-components'></a>Diego Brain ###
 
-Diego Brain components distribute Tasks and LRPs to Diego Cells, and correct discrepancies between `ActualLRP` and `DesiredLRP` counts to ensure fault-tolerance and long-term consistency. The Diego Brain consists of the Auctioneer and the Converger.
+Diego Brain components distribute Tasks and LRPs to Diego [Cells](#cell-components), and correct discrepancies between `ActualLRP` and `DesiredLRP` counts to ensure fault-tolerance and long-term consistency. The Diego Brain consists of the [Auctioneer](#auctioneer) and the [Converger](#converger).
 
 <a id='auctioneer'></a>
 #### Auctioneer ####
@@ -55,24 +55,24 @@ Diego Brain components distribute Tasks and LRPs to Diego Cells, and correct dis
 - Uses the [auction](https://github.com/cloudfoundry-incubator/auction) package
 to run [Diego auctions](./diego-auction.html) for Tasks and `ActualLRP` instances
 
-- Communicates with Cell Reps over HTTP
+- Communicates with Cell [Reps](#rep) over HTTP
 
-- Maintains a lock in the BBS that restricts auctions to one Auctioneer at a time
+- Maintains a lock in the [BBS](#bbs) that restricts auctions to one Auctioneer at a time
 
 Refer to the [Auctioneer repo](https://github.com/cloudfoundry-incubator/auctioneer) on GitHub for more information.
 
 <a id='converger'></a>
 #### Converger ####
 
-- Uses converge methods from the Runtime-Schema to analyze snapshots of the BBS to ensure consistency and fault tolerance for Tasks and LRPs
+- Uses converge methods from the Runtime-Schema to analyze snapshots of the [BBS](#bbs) to ensure consistency and fault tolerance for Tasks and LRPs
 
 - Acts to keep `DesiredLRP` count and `ActualLRP` count synchronized in the following ways:
-    - If the `DesiredLRP` count exceeds the `ActualLRP` count, the Converger requests a start auction from the Auctioneer
-    - If the `ActualLRP` count exceeds the `DesiredLRP` count, the Converger sends a stop message to the Rep on the Cell hosting an instance
+    - If the `DesiredLRP` count exceeds the `ActualLRP` count, the Converger requests a start auction from the [Auctioneer](#auctioneer)
+    - If the `ActualLRP` count exceeds the `DesiredLRP` count, the Converger sends a stop message to the [Rep](#rep) on the [Cell](#cell-components) hosting an instance
 
 - Monitors for potentially missed messages, resending them if necessary
 
-- Maintains a lock in the BBS that limits converger performance to one Converger at a time
+- Maintains a lock in the [BBS](#bbs) that limits converger performance to one Converger at a time
 
 Refer to the [Converger repo](https://github.com/cloudfoundry-incubator/converger) on GitHub for more information.
 
@@ -105,13 +105,13 @@ Refer to the [Receptor repo](https://github.com/cloudfoundry-incubator/receptor)
 
 - Represents a Cell in [Diego auctions](./diego-auction.html) for Tasks and LRPs
 
-- Mediates all communication between the Cell and the Bulletin Board System (BBS)
+- Mediates all communication between the Cell and the [Bulletin Board System](#bbs) (BBS)
 
-- Ensures synchronization between the set of Tasks and `ActualLRPs` in the BBS with the containers present on the Cell
+- Ensures synchronization between the set of Tasks and `ActualLRPs` in the [BBS](#bbs) with the containers present on the Cell
 
-- Maintains the presence of the Cell in the BBS
+- Maintains the presence of the Cell in the [BBS](#bbs)
 
-- Runs Tasks and LRPs by asking the in-process Executor to create a container and `RunAction` recipes
+- Runs Tasks and LRPs by asking the in-process [Executor](#executor) to create a container and `RunAction` recipes
 
 Refer to the [Rep repo](https://github.com/cloudfoundry-incubator/rep) on GitHub for more information.
 
@@ -120,7 +120,7 @@ Refer to the [Rep repo](https://github.com/cloudfoundry-incubator/rep) on GitHub
 
 - Implements the generic Executor actions detailed in the [API documentation](https://github.com/cloudfoundry-incubator/receptor/blob/master/doc/actions.md)
 
-- Streams `STDOUT` and `STDERR` to the Metron agent running on the Cell
+- Streams `STDOUT` and `STDERR` to the [Metron agent](#metron-agent) running on the Cell
 
 Refer to the [Executor repo](https://github.com/cloudfoundry-incubator/executor) on GitHub for more information.
 
@@ -144,12 +144,12 @@ Refer to the [Metron repo](https://github.com/cloudfoundry/loggregator/tree/deve
 
 ##<a id='bridge-components'></a>CC-Bridge Components ##
 
-CC-Bridge components translate app-specific requests from the Cloud Controller to the Receptor, the RESTful API for Diego. These components include the following:
+CC-Bridge components translate app-specific requests from the Cloud Controller to the [Receptor](#receptor), the RESTful API for Diego. These components include the following:
 
 <a id='stager'></a>
 ### Stager ###
 
-- Translates staging requests from the Cloud Controller into generic Tasks for the Receptor
+- Translates staging requests from the Cloud Controller into generic Tasks for the [Receptor](#receptor)
 
 - Sends a response to the Cloud Controller when a Task completes
 
@@ -158,7 +158,7 @@ Refer to the [Stager repo](https://github.com/cloudfoundry-incubator/stager) on 
 <a id='nsync'></a>
 ### Nsync ###
 
-- Consumes app requests to update the `DesiredLRPs` count and submits it to the receptor
+- Consumes app requests to update the `DesiredLRPs` count and submits it to the [Receptor](#receptor)
 
 - Periodically polls Cloud Controller for each app to ensure Diego has current desired state 
 
@@ -174,9 +174,9 @@ Refer to the [TPS repo](https://github.com/cloudfoundry-incubator/tps) on GitHub
 <a id='cc-uploader'></a>
 ### CC-Uploader ###
 
-- Mediates uploads from the Executor to the Cloud Controller  
+- Mediates uploads from the [Executor](#executor) to the Cloud Controller  
 
-- Translates simple HTTP POST requests from the Executor into complex multipart-form uploads for the Cloud Controller
+- Translates simple HTTP POST requests from the [Executor](#executor) into complex multipart-form uploads for the Cloud Controller
 
 Refer to the [CC-Uploader repo](https://github.com/cloudfoundry-incubator/cc-uploader) on GitHub for more information.
 
@@ -215,11 +215,11 @@ Refer to the [Garden repo](https://github.com/cloudfoundry-incubator/garden) on 
 
 App Lifecycles implement deployment strategies. Each App Lifecycle contains the following three binaries:
 
-- The **Builder**, which stages a CF application. The CC-Bridge runs the Builder as a Task on every staging request. The Builder performs static analysis on the application code and does any necessary pre-processing before the application is first run.
+- The **Builder**, which stages a CF application. The [CC-Bridge](#bridge-components) runs the Builder as a Task on every staging request. The Builder performs static analysis on the application code and does any necessary pre-processing before the application is first run.
 
-- The **Launcher**, which runs a CF application. The CC-Bridge sets the Launcher as the Action on the `DesiredLRP` for the application. The Launcher executes the start command with the correct system context, including working directory and environment variables.
+- The **Launcher**, which runs a CF application. The [CC-Bridge](#bridge-components) sets the Launcher as the Action on the `DesiredLRP` for the application. The Launcher executes the start command with the correct system context, including working directory and environment variables.
 
-- The **Healthcheck**, which performs a status check on running CF application from inside the container. The CC-Bridge sets the Healthcheck as the Monitor action on the `DesiredLRP` for the application. 
+- The **Healthcheck**, which performs a status check on running CF application from inside the container. The [CC-Bridge](#bridge-components) sets the Healthcheck as the Monitor action on the `DesiredLRP` for the application. 
 
 <a id='lifecycle-implementations'></a>
 #### Current Implementations ####
