@@ -1,39 +1,61 @@
 ---
-title: Diego Architecture
+title: Diego Overview
 ---
 
 This documents provides an overview of Diego, the next-generation container 
 management system for Cloud Foundry (CF). 
 
-Diego replaces the [Droplet Execution Agents](./architecture/execution-agent
-.html) (DEAs) in a Cloud Foundry deployment.
-
 * To deploy Diego, see the GitHub [Diego-Release](https://github.com/cloudfoundry-incubator/diego-release).
 * For more information about the major components of Diego and how they interact with other Cloud Foundry components, see [Diego Components](./diego-components.html).
-* For more information about how Diego schedules Tasks and LRPs, see [The Diego Auction](./diego-auction.html). 
 
 ##<a id='overview'></a>Overview
 
-Diego schedules and manages two types of processes: **Tasks** and **Long Running Processes** (LRPs). 
+Diego replaces the [Droplet Execution Agents](./architecture/execution-agent
+.html) (DEAs) and [Health Manager](./architecture/index.html#hm9k) in a Cloud Foundry deployment. Diego performs the following key functions:
 
-* <a id='task'></a>**Task**: Tasks run once, for a finite amount of time.     
-    Example Tasks: Making a database schema change, bulk importing data to 
-    initialize a database, setting up a connected service
+* Runs and monitors **Tasks** and **Long Running Processes** (LRPs) 
+* Manages Garden containers
+* Synchronizes `DesiredLRP` counts from the Cloud Controller with `ActualLRP` counts to ensure application fault-tolerance and long-term consistency
 
-* <a id='lrp'></a>**Long Running Process** (LRP): LRPs run continuously, for an indefinite time. LRPs only terminate if stopped or killed, or in the case of failure. Diego can run multiple instances of any LRP.
+The Cloud Controller passes requests to stage and run applications to CC-Bridge. 
 
-    Example LRPs: A web-server, a service that continuously accepts input and 
-    processes it, an application
+CC-Bridge translates staging and running requests into Tasks and LRPs, then  submits these to the Bulletin Board System (BBS) through either an RPC-style API over HTTP, or through the Receptor, a RESTful, JSON-encoded API adapter for the BBS API. 
+
+The BBS provides Tasks and LRPs to the Auctioneer. 
+
+The Auctioneer distributes these Tasks and LRPs to the cluster of Diego Cells through an Auction. The Auction queries, then assigns Task or LRPs to Cell Reps.
+
+Once the Auction assigns a Task or LRP to a Cell, an in-process Executor creates a Garden container and executes the Task or LRP in the container.
+
+The BBS also tracks desired LRPs, running LRP instances, and in-flight Tasks for the Converger. The Converger periodically analyzes this information and corrects discrepancies, ensuring that Diego is eventually consistent.
+
+Metron Agents forward application logs, errors, and application and Diego metrics to the [Loggregator](https://github.com/cloudfoundry/loggregator) Doppler component 
+ 
+
+## <a id='processes'></a>Tasks and Long Running Processes
+
+Diego runs and monitors two types of processes: **Tasks** and **Long Running Processes** (LRPs). 
+
+* <a id='task'></a>**Tasks**: Tasks run once, for a finite amount of time.
+   
+    Example Tasks: Making a database schema change, bulk importing data to initialize a database, setting up a connected service
+
+* <a id='lrp'></a>**Long Running Processes** (LRPs): LRPs run continuously, for an indefinite time. LRPs only terminate if stopped or killed, or in the case of failure. Diego can run multiple instances of any LRP.
+    
+	Example LRPs: A web-server, a service that continuously accepts input and processes it, an application
+
+For more information about how Diego schedules Tasks and LRPs, see [The Diego Auction](./diego-auction.html). 
+
 
 ## <a id='interfacing'></a>Interfacing with Existing Cloud Foundry Deployments
 
-The translation layer, CC-Bridge, converts the [Cloud Controller](./diego-pedia.html#cloud-controller)'s domain-specific requests to stage and run applications into requests terms that Diego understands: Tasks and LRPs.  
+The translation layer, CC-Bridge, converts the [Cloud Controller](./diego-components.html#cloud-controller)'s domain-specific requests to stage and run applications into requests terms that Diego understands: Tasks and LRPs.  
 
 (Ask Diego PM for clarification on the abstraction.) Diego is abstracted away from the Cloud Controller and other Cloud Foundry components such as the Loggregator and the Router. Non-Diego CF components consume Diego via the [Receptor API](https://github.com/cloudfoundry-incubator/receptor/blob/master/doc/README.md). Diego duplicates Cloud Foundry components.
 
-(Either delete or need more clarification if relevant - check on this) The process of staging and running a CF application is complex and filled with platform and implementation-specific details. These concerns are encapsulated in a triad of binaries known collectively as the [App Lifecycle](./diego-pedia.html#app-lifecycles).  The Tasks and LRPs produced by the CC-Bridge download the App Lifecycle binaries and run them to stage, start, and health-check CF applications.
+(Either delete or need more clarification if relevant - check on this) The process of staging and running a CF application is complex and filled with platform and implementation-specific details. These concerns are encapsulated in a triad of binaries known collectively as the [App Lifecycle](./diego-components.html#app-lifecycles).  The Tasks and LRPs produced by the CC-Bridge download the App Lifecycle binaries and run them to stage, start, and health-check CF applications.
 
-## <a id='conclusion'></a>Monitoring and Testing
+## <a id='monitoring'></a>Monitoring and Testing
 
 You can monitor and test runtime deployment using the following releases:
 
