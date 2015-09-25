@@ -11,13 +11,13 @@ This documents provides an overview of the high-level structure of Diego, the ne
 
 In a Cloud Foundry deployment without Diego, the Cloud Controller schedules and manages applications on the [Droplet Execution Agents](./architecture/execution-agent.html) (DEAs). Diego replaces the DEAs and the [Health Manager](./architecture/index.html#hm9k), and assumes application scheduling and management responsibility from the Cloud Controller.
 
-Diego handles application requests in the following manner:
+Refer to the diagram and descriptions below for information about the way Diego handles application requests.
 
-1. The Cloud Controller passes requests to stage and run applications to [CC-Bridge](./diego-components.html#bridge-components). 
+<%= image_tag("../images/diego/diego-flow.png") %>
 
-    <%= image_tag("../images/diego/cc-ccbridge.png") %>
+1. The Cloud Controller passes requests to stage and run applications to [CC-Bridge](./diego-components.html#bridge-components).
 
-1. CC-Bridge translates staging and running requests into [Tasks and Long Running Processes](#processes) (LRPs), then  submits these to the [Bulletin Board System](./diego-components.html#bbs) (BBS) through either an RPC-style API over HTTP, or through the [Receptor](./diego-components.html#receptor), a RESTful, JSON-encoded API adapter for the BBS API. 
+1. CC-Bridge translates staging and running requests into [Tasks and Long Running Processes](#processes) (LRPs), then  submits these to the [Bulletin Board System](./diego-components.html#bbs) (BBS) through an RPC-style API over HTTP. 
 
 1. The BBS provides Tasks and LRPs to the [Auctioneer](./diego-components.html#auctioneer). 
 
