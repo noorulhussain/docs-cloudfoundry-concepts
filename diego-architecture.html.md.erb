@@ -13,7 +13,9 @@ In a Cloud Foundry deployment without Diego, the Cloud Controller schedules and 
 
 Diego handles application requests in the following manner:
 
-1. The Cloud Controller passes requests to stage and run applications to CC-Bridge. 
+1. The Cloud Controller passes requests to stage and run applications to [CC-Bridge](./diego-components.html#bridge-components). 
+
+    <%= image_tag("../images/diego/cc-ccbridge.png") %>
 
 1. CC-Bridge translates staging and running requests into [Tasks and Long Running Processes](#processes) (LRPs), then  submits these to the [Bulletin Board System](./diego-components.html#bbs) (BBS) through either an RPC-style API over HTTP, or through the [Receptor](./diego-components.html#receptor), a RESTful, JSON-encoded API adapter for the BBS API. 
 
