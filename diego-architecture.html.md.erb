@@ -5,7 +5,7 @@ title: Diego Architecture
 This documents provides an overview of the high-level structure of Diego, the next-generation container management system for Cloud Foundry (CF). 
 
 * To deploy Diego, see the GitHub [Diego-Release](https://github.com/cloudfoundry-incubator/diego-release).
-* For more information about the major components of Diego and how they interact with other Cloud Foundry components, see [Diego Components](./diego-components.html).
+* For more information about the major components of Diego and how they interact with other Cloud Foundry components, see the [Diego Components](./diego-components.html) topic.
 
 ##<a id='overview'></a>Overview
 
@@ -43,26 +43,17 @@ Diego runs and monitors two types of processes: **Tasks** and **Long Running Pro
 
 For more information about how Diego schedules Tasks and LRPs, see [The Diego Auction](./diego-auction.html). 
 
-
-## <a id='interfacing'></a>Interfacing with Existing Cloud Foundry Deployments
-
-The translation layer, CC-Bridge, converts the [Cloud Controller](./diego-components.html#cloud-controller)'s domain-specific requests to stage and run applications into requests terms that Diego understands: Tasks and LRPs.  
-
-(Ask Diego PM for clarification on the abstraction.) Diego is abstracted away from the Cloud Controller and other Cloud Foundry components such as the Loggregator and the Router. Non-Diego CF components consume Diego via the [Receptor API](https://github.com/cloudfoundry-incubator/receptor/blob/master/doc/README.md). Diego duplicates Cloud Foundry components.
-
-(Either delete or need more clarification if relevant - check on this) The process of staging and running a CF application is complex and filled with platform and implementation-specific details. These concerns are encapsulated in a triad of binaries known collectively as the [App Lifecycle](./diego-components.html#app-lifecycles).  The Tasks and LRPs produced by the CC-Bridge download the App Lifecycle binaries and run them to stage, start, and health-check CF applications.
-
 ## <a id='monitoring'></a>Monitoring and Testing
 
 You can monitor and test runtime deployment using the following releases:
 
-### <a id='inigo'></a>Inigo
+###Inigo
 
 Inigo is an integration test suite that launches the Diego components through various test cases, including component failures and other exceptional scenarios. Inigo validates a given set of component versions to ensure they are mutually compatible, and that the system of these components is robust and performance degrades gracefully.
 
-[**Inigo on GitHub**](https://github.com/cloudfoundry-incubator/inigo)
+Refer to the [Inigo repo](https://github.com/cloudfoundry-incubator/inigo) on GitHub for more information.
 
-### <a id='auction'></a>Auction
+###Auction
 
 Diego allocates tasks and long running processes (LRPs) to the executing cells using the [Diego Auction](./diego-auction.html). 
 
@@ -74,33 +65,20 @@ The Auction package encodes behavioral details for the Diego Auction. It include
 
 - Across multiple machines in a cloud-like infrastructure, to reveal the impact of latency on the auction
 
+Refer to the [Auction repo](https://github.com/cloudfoundry-incubator/inigo) on GitHub for more information.
 
-[**Auction on GitHub**](https://github.com/cloudfoundry-incubator/auction)
+###Diego Acceptance Tests
 
-### Diego Acceptance Tests
+Diego Acceptance Tests (DAT) is a suite of acceptance-level tests that run against CF and Diego deployment releases. The purpose of DAT is to execute a number of happy-path test cases across the entire stack.
 
-DAT is a suite of acceptance-level tests that run against CF and Diego deployment releases. The purpose of DAT is to execute a number of happy-path test cases across the entire stack.
+Refer to the [Diego Acceptance Test  repo](https://github.com/cloudfoundry-incubator/diego-acceptance-tests) on GitHub for more information.
 
-(Need more details on how to use CF CLI to run the tests) You can use the CF CLI to run the tests.
+###Runtime-Schema
 
-[**Diego-Acceptance-Tests on GitHub**](https://github.com/cloudfoundry-incubator/diego-acceptance-tests)
-
-### <a id='runtime-schema'></a>Runtime-Schema
-
-(Is this a test? Written like a component)
 The Runtime-Schema encodes all communication between Diego components and the BBS.  The Receptor, Rep, and Converger are the primary consumers of Runtime-Schema.
 
 Access to the consistent store is mediated via the BBS.  The BBS is comprised of several domain-specific sub-BBS packages.  Each Diego component is then given a *view* into the BBS (implemented as a Golang interface) to clarify the role and responsibility of the component.
 
 The models by which components communicate are encoded in the models package.
 
-[**Runtime-Schema on GitHub**](https://github.com/cloudfoundry-incubator/runtime-schema)
-
-
-
-Diego performs the following key functions:
-
-* Runs and monitors **Tasks** and **Long Running Processes** (LRPs) 
-* Manages Garden containers
-* Reconciles the `DesiredLRP` counts from the Cloud Controller with `ActualLRP` counts to ensure application fault-tolerance and long-term consistency
-
+Refer to the [Runtime Schema  repo](https://github.com/cloudfoundry-incubator/runtime-schema) on GitHub for more information.
